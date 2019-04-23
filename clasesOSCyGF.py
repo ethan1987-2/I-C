@@ -9,11 +9,12 @@ import visa
 import numpy as np
 from matplotlib import pyplot as pp
 
-
+rm1=visa.ResourceManager()
+rm1.list_resources()
 
 class OsciloscopeTDS1002B():
       
-    def __init__(self, serial):
+    def __init__(self, serial,xun='s',yun='Volts'):
         self.rm = visa.ResourceManager()        
         self.serial = serial
         self.ins = self.rm.open_resource('USB0::0x0699::0x0363::{}::INSTR'.format(serial))
@@ -24,6 +25,9 @@ class OsciloscopeTDS1002B():
         self.ins.write('WFMP:BN_F'+' '+'RP')
         self.ins.write('WFMP:BYT_O'+' '+'MSB')
         self.ins.write('WFMP:ENC'+' '+'BIN')
+        self.set_xun(xun)
+        self.set_yun(yun)
+        
 
     def idn(self):
         return self.ins.query('*IDN?')
@@ -37,25 +41,26 @@ class OsciloscopeTDS1002B():
         self.ins.write('DAT:SOU'+' '+str(CH))
         self.ins.write('MEASU:IMM:SOU'+' '+str(CH))
     
+    
     @canal.getter
     def canal(self):
         self.ins.query('DAT:SOU?')
   
     def set_yun(self, yun): #yun= Volts,VV, U: nro divisiones, A:amps,AA, VA:volamps, dB
-        self.ins.write('WFMP:YUN'+' '+yun)
+        self.__yun=self.ins.write('WFMP:YUN'+' '+yun)
         
     def get_yun(self):
         return self.ins.query('WFMP:YUN?')
 
-    self.yun=property(set_yun,get_yun)
+    yun=property(get_yun,set_yun)
     
     def set_xun(self, xun):  #xun= Hz, s
-        self.ins.write('WFMP:XUN'+' '+xun)
+         self.__xun=self.ins.write('WFMP:XUN'+' '+xun)
 
     def get_xun(self):
         return self.ins.query('WFMP:XUN?')
 
-    self.xun=property(set_xun,get_xun)
+    xun=property(get_xun,set_xun)
     
     
     def datos(self):
@@ -142,24 +147,13 @@ class FunctionGeneratorAFG3021B():
     def fase(self):
         self.ins.query('SOUR{}'.format(self.canal)+':PHAS?')
     
-    
-
-
-funcg=FunctionGeneratorAFG3021B('C065089??') #CAMBIAR!!!
-
-funcg.ampVPP=5
-funcg.fase=(np.pi/3,'RAD') #preguntar esto, si asigne bien valores multiples a la propiedad
-funcg.frec=(1,'kHz')
-funcg.prende
-
-    
-osc = OsciloscopeTDS1002B('C065089??') #CAMBIAR!!!
+osc = OsciloscopeTDS1002B('C108012') #CAMBIAR!!!
 
 osc.medir
 osc.xun='s'
 osc.yun='Volts'
-osc.canal=1
-frecVal=osc.frec
+osc.canal=2
+frecVal=osc.frec()
 
 (X,Y)=osc.datos
 [X,Y]=np.array([X,Y])
@@ -170,4 +164,20 @@ pp.title('Captura de pantalla')
 pp.xlabel(osc.xun)
 pp.ylabel(osc.yun)
         
+     
+
+
+funcg=FunctionGeneratorAFG3021B('C108012') #CAMBIAR!!!
+
+funcg.ampVPP=5
+funcg.fase=(np.pi/3,'RAD') #preguntar esto, si asigne bien valores multiples a la propiedad
+funcg.frec=(1,'kHz')
+funcg.prende
+
     
+osc.ins.query('MEASU:IMM?')
+osc.ins.query('DAT:SOU?')
+osc.yun='A'
+
+osc.ins.write('WFMP:YUN dB')
+osc.ins.query('WFMP:YUN?')
