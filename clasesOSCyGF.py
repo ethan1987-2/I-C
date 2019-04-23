@@ -7,7 +7,7 @@ Created on Tue Apr  9 18:32:07 2019
 
 import visa
 import numpy as np
-from matplotlib import pyplot as plot
+from matplotlib import pyplot as pp
 
 
 
@@ -16,70 +16,158 @@ class OsciloscopeTDS1002B():
     def __init__(self, serial):
         self.rm = visa.ResourceManager()        
         self.serial = serial
-        self.osci = self.rm.open_resource('USB0::0x0699::0x0363::{}::INSTR'.format(serial))
-        self.acquire = self.osci.write('ACQ:STATE 1')
-    
+        self.ins = self.rm.open_resource('USB0::0x0699::0x0363::{}::INSTR'.format(serial))
+        self.medir= self.ins.write('ACQ:STATE 1')
+        self.apagar= self.ins.write('ACQ:STATE 0')
+        self.ins.write('WFMP:BYT_N'+' '+'1')
+        self.ins.write('WFMP:BIT_N'+' '+'8')
+        self.ins.write('WFMP:BN_F'+' '+'RP')
+        self.ins.write('WFMP:BYT_O'+' '+'MSB')
+        self.ins.write('WFMP:ENC'+' '+'BIN')
+
     def idn(self):
-        return self.osci.query('*IDN?')
+        return self.ins.query('*IDN?')
+
+    @property
+    def canal(self):
+        return self.__canal
+    
+    @canal.setter
+    def canal(self,CH,set_value=True):
+        self.ins.write('DAT:SOU'+' '+str(CH))
+        self.ins.write('MEASU:IMM:SOU'+' '+str(CH))
+    
+    @canal.getter
+    def canal(self):
+        self.ins.query('DAT:SOU?')
+  
+    def set_yun(self, yun): #yun= Volts,VV, U: nro divisiones, A:amps,AA, VA:volamps, dB
+        self.ins.write('WFMP:YUN'+' '+yun)
         
-    def data_points(self):
-        YMU = float(self.osci.query('WFMP:YMU?'))
-        YOF = float(self.osci.query('WFMP:YOF?'))
-        YZE = float(self.osci.query('WFMP:YZERO?'))
-        yn_dl = self.osci.query_binary_values('CURV?',datatype='B', is_big_endian=True)
+    def get_yun(self):
+        return self.ins.query('WFMP:YUN?')
+
+    self.yun=property(set_yun,get_yun)
+    
+    def set_xun(self, xun):  #xun= Hz, s
+        self.ins.write('WFMP:XUN'+' '+xun)
+
+    def get_xun(self):
+        return self.ins.query('WFMP:XUN?')
+
+    self.xun=property(set_xun,get_xun)
+    
+    
+    def datos(self):
+        YMU = float(self.ins.query('WFMP:YMU?'))
+        YOF = float(self.ins.query('WFMP:YOF?'))
+        YZE = float(self.ins.query('WFMP:YZE?'))
+        
+        yn_dl = self.ins.query_binary_values('CURV?',datatype='B', is_big_endian=True)
         
         Yn = YZE + YMU*(np.array(yn_dl) - YOF)
 
-        XIN=float(self.osci.query('WFMP:XIN?'))
-        #XUN = self.osci.query('WFMP:XUN?')
-        XZE = float(self.osci.query('WFMP:XZE?'))
-        PT_OF = float(self.osci.query('WFMP:PT_OF?'))
+        XIN=float(self.ins.query('WFMP:XIN?'))
+        XZE = float(self.ins.query('WFMP:XZE?'))
+        PT_OF = float(self.ins.query('WFMP:PT_OF?'))
 
         Xn = XZE + XIN*(np.linspace(1,2500,2500) - PT_OF)
         return (Xn,Yn)    
-    
-    def set_yscale(self, yscale, channel = 1):
-        self.osci.write('CH'+str(channel)+':SCA'+str(yscale))
         
-    def get_yscale(self, channel = 1):
-        return self.osci.query('CH'+str(channel)+':SCA?')
-    
-    def set_xscale(self, xscale):
-        self.osci.write('HOR:DEL:SCA'+ str(xscale))
+    def frec(self):
+        self.ins.write('MEASU:IMM:TY FREQ')
+        return self.ins.query('MEASU:IMM:VAL?')
         
-    def get_freq(self):
-        self.osci.query()
         
+        
+        
+        
+        
+############################################################
 class FunctionGeneratorAFG3021B():
     
     def __init__(self, serial):
         self.rm = visa.ResourceManager()        
         self.serial = serial
-        self.fgen = self.rm.open_resource('USB0::0x0699::0x0346::{}::INSTR'.format(serial))
-        #self.fgen.turn_on = self.fgen.write('OUTP1:STAT 1')
+        self.ins = self.rm.open_resource('USB0::0x0699::0x0346::{}::INSTR'.format(serial))
+        self.prende= self.ins.write('OUTP1:STAT 1')
+        self.apaga= self.ins.write('OUTP1:STAT 0')
         
-    def set_amp(self, amp):
-        self.fgen.write('SOUR1:VOLT:LEV:IMM:AMPL '+str(amp)+'VPP')
+    
+    @property
+    def canal(self):
+         return self.__canal
+    
+    @canal.setter
+    def canal(self,CH,set_value=True):
+        self.canal=CH
+    
+    @canal.getter
+    def canal(self):
+        return self
         
-    def set_freq(self, freq):
-        self.fgen.write('SOUR1:FREQ {}'.format(freq))
+    def set_amp(self, ampVpp):
+        self.ins.write('SOUR{}'.format(self.canal)':VOLT:LEV:IMM:AMPL '+str(ampVpp)+'VPP')
+
+    def get_amp(self):
+        self.ins.query('SOUR{}'.format(self.canal)':VOLT:LEV:IMM:AMPL?)
+        
+    self.ampVPP=property(get_amp,set_amp)
+        
+    def set_freq(self, freq, frecun): #freq es un nro frecun=Hz, MHz, kHz
+        self.ins.write('SOUR{}'.format(self.canal)':FREQ:FIX {}'.format(freq) + frecun)
         
     def get_freq(self):
-        return self.fgen.query('SOUR1:FREQ?') 
-        
+        return self.ins.query('SOUR{}'.format(self.canal)':FREQ:FIX?') 
+
+    self.frec=property(get_freq,set_freq)
+    
     def set_offset(self, offset):
-        self.fgen.write('SOUR1:VOLT:OFFSET {}'.format(offset))
+        self.ins.write('SOUR{}'.format(self.canal)':VOLT:OFFSET {}'.format(offset))
+        
+    def get_offset(self):
+        return self.ins.query('SOUR{}'.format(self.canal)':VOLT:OFFSET?') 
+    
+    self.offset=property(get_offset,set_offset)   
+    
+    @property
+    def fase(self):
+        return self.fase
+    
+    @fase.setter
+    def fase(self,phi,phiUn):#phiUN= RAD, DEG
+        self.ins.write('SOUR{}'.format(self.canal)+':PHAS {}'.format(phi) + phiUn)
+    
+    @fase.getter
+    def fase(self):
+        self.ins.query('SOUR{}'.format(self.canal)+':PHAS?')
     
     
-    
-osc = OsciloscopeTDS1002B('C065089')
-#OsciloscopeTDS1002B.osci
-#oscil.idn()
-#oscil.read_yscale(1)
-#datos = oscil.data_points()
 
 
+funcg=FunctionGeneratorAFG3021B('C065089??') #CAMBIAR!!!
+
+funcg.ampVPP=5
+funcg.fase=(np.pi/3,'RAD') #preguntar esto, si asigne bien valores multiples a la propiedad
+funcg.frec=(1,'kHz')
+funcg.prende
+
     
-    
+osc = OsciloscopeTDS1002B('C065089??') #CAMBIAR!!!
+
+osc.medir
+osc.xun='s'
+osc.yun='Volts'
+osc.canal=1
+frecVal=osc.frec
+
+(X,Y)=osc.datos
+[X,Y]=np.array([X,Y])
+
+
+pp.plot(X,Y,'.')
+pp.title('Captura de pantalla')
+pp.xlabel(osc.xun)
+pp.ylabel(osc.yun)
         
     
