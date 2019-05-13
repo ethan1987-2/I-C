@@ -4,7 +4,10 @@ Created on Tue Apr  9 18:32:07 2019
 
 @author: Publico
 """
-
+import time
+import visa
+import numpy as np
+from matplotlib import pyplot as pp
 
 
 class OsciloscopeTDS1002B():
@@ -25,6 +28,24 @@ class OsciloscopeTDS1002B():
 #        self.canalinic=self.ins.query('DAT:SOU?')
 #        self.__canal=self.canalinic[:3]
         
+
+#    self.medir= self.ins.write('ACQ:STATE 1')
+#    self.apagar= self.ins.write('ACQ:STATE 0')
+        
+    def auto(self):
+        self.ins.write('AUTOS EXEC')
+    
+    def set_tscal(self, tsca): #yun= Volts,VV, U: nro divisiones, A:amps,AA, VA:volamps, dB
+        self.ins.write('HOR:MAI:SCA {}'.format(tsca))
+        
+    def get_tscal(self):
+        return self.ins.query('HOR:MAI:SCA?')
+
+    def set_vscal(self, vsca,CH): #yun= Volts,VV, U: nro divisiones, A:amps,AA, VA:volamps, dB
+        self.ins.write('CH{}'.format(CH)+':SCA'+' '+str(vsca))
+        
+    def get_vscal(self,CH):
+        return self.ins.query('CH{}'.format(CH)+':SCA?')
 
     def idn(self):
         return self.ins.query('*IDN?')
@@ -74,11 +95,17 @@ class OsciloscopeTDS1002B():
         PT_OF = float(self.ins.query('WFMP:PT_OF?'))
 
         Xn = XZE + XIN*(np.linspace(1,2500,2500) - PT_OF)
-        return np.array([Xn,Yn])
+        return (Xn,Yn)
     
         
     def medir_frec(self): #un método
-        self.ins.write('MEASU:IMM:TY FREQ')
+        self.ins.write('MEASU:IMM:TYP FREQ')
+        time.sleep(1)
+        return self.ins.query('MEASU:IMM:VAL?')
+    
+    def medir_vpp(self): #un método
+        self.ins.write('MEASU:IMM:TYP PK2PK')
+        time.sleep(1)
         return self.ins.query('MEASU:IMM:VAL?')
         
         
