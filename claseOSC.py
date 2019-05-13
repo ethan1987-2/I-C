@@ -17,22 +17,17 @@ class OsciloscopeTDS1002B():
         self.serial = serial
         self.ins = self.rm.open_resource('USB0::0x0699::0x0363::{}::INSTR'.format(serial))
         self.medir= self.ins.write('ACQ:STATE 1')
-        self.apagar= self.ins.write('ACQ:STATE 0')
         self.ins.write('WFMP:BYT_N'+' '+'1')
         self.ins.write('WFMP:BIT_N'+' '+'8')
         self.ins.write('WFMP:BN_F'+' '+'RP')
         self.ins.write('WFMP:BYT_O'+' '+'MSB')
         self.ins.write('WFMP:ENC'+' '+'BIN')
-#        self.__xun=self.ins.query('WFMP:XUN?')
-#        self.__yun=self.ins.query('WFMP:YUN?')
-#        self.canalinic=self.ins.query('DAT:SOU?')
-#        self.__canal=self.canalinic[:3]
         
 
-#    self.medir= self.ins.write('ACQ:STATE 1')
-#    self.apagar= self.ins.write('ACQ:STATE 0')
+    def apagar(self): # detener osciloscopio
+        self.ins.write('ACQ:STATE 0')
         
-    def auto(self):
+    def auto(self): # ejecutar autoconfiguracion del osciloscopio
         self.ins.write('AUTOS EXEC')
     
     def set_tscal(self, tsca): #yun= Volts,VV, U: nro divisiones, A:amps,AA, VA:volamps, dB
@@ -50,13 +45,11 @@ class OsciloscopeTDS1002B():
     def idn(self):
         return self.ins.query('*IDN?')
 
-    @property
-    def canal(self):
+    def get_canal(self):
         print('canal de toma de datos de curva configurado en instrumento:')
         return self.ins.query('DAT:SOU?')
     
-    @canal.setter
-    def canal(self,CH,set_value=True): #CH=CH1 o CH2
+    def set_canal(self,CH,set_value=True): #CH=CH1 o CH2
         if not CH in (1,2):
             raise ValueError('El valor debe ser numérico 1 o 2')
         else:
@@ -70,17 +63,12 @@ class OsciloscopeTDS1002B():
     def get_yun(self):
         return self.ins.query('WFMP:YUN?')
 
-    yun=property(get_yun,set_yun)
-    
     def set_xun(self, xun):  #xun= Hz, s
          self.ins.write('WFMP:XUN'+' '+xun)
 
     def get_xun(self):
         return self.ins.query('WFMP:XUN?')
 
-    xun=property(get_xun,set_xun)
-    
-    
     def datos(self):
         YMU = float(self.ins.query('WFMP:YMU?'))
         YOF = float(self.ins.query('WFMP:YOF?'))
