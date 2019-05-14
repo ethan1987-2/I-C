@@ -17,6 +17,7 @@ class AudioCard:
         self.phase = None
         self.waveform = None
         self.loop = None
+        self.amplitude = None
 
     def record(self, fs, duration):                                       # Enter sampling frequency (fs) and duration.
 
@@ -30,10 +31,11 @@ class AudioCard:
                            blocking=True)
         return time, recording
 
-    def playback(self, fs, duration, frequency, phase, waveform, loop):   # loop: boolean; waveform: SIN/SQR/RAMP/PULSE.
-
+    def playback(self, fs, duration, amplitude, frequency, phase, waveform, loop):
+        # loop: boolean; waveform: SIN/SQR/RAMP/PULSE.
         self.fs = fs
         self.duration = duration
+        self.amplitude = amplitude
         self.frequency = frequency
         self.phase = phase
         self.waveform = waveform
@@ -44,14 +46,46 @@ class AudioCard:
         sound = None
 
         if waveform == 'SIN':
-            sound = np.sin(2 * np.pi * frequency * time + phase)
+            sound = amplitude * np.sin(2 * np.pi * frequency * time + phase)
         elif waveform == 'SQR':
-            sound = sg.square(2 * np.pi * frequency * time + phase, 0.5)
+            sound = amplitude * sg.square(2 * np.pi * frequency * time + phase, 0.5)
         elif waveform == 'RAMP':
-            sound = sg.sawtooth(2 * np.pi * frequency * time + phase, 0.5)
+            sound = amplitude * sg.sawtooth(2 * np.pi * frequency * time + phase, 0.5)
         elif waveform == 'PULSE':
-            sound = sg.unit_impulse(shape=np.size(time), idx='mid')
+            sound = amplitude * sg.unit_impulse(shape=np.size(time), idx='mid')
 
-        sd.play(data=sound, samplerate=fs, blocking=True, loop=loop)
+        sd.play(data=sound,
+                samplerate=fs,
+                blocking=True,
+                loop=loop)
 
         return time, sound
+
+    def playback_record(self, fs, duration, amplitude, frequency, phase, waveform, loop):
+
+        self.fs = fs
+        self.duration = duration
+        self.amplitude = amplitude
+        self.frequency = frequency
+        self.phase = phase
+        self.waveform = waveform
+        self.loop = loop
+
+        # Set the input numpy.array to reproduce
+        time = np.linspace(start=0, stop=duration, num=duration*fs)
+        sound = None
+
+        if waveform == 'SIN':
+            sound = amplitude * np.sin(2 * np.pi * frequency * time + phase)
+        elif waveform == 'SQR':
+            sound = amplitude * sg.square(2 * np.pi * frequency * time + phase, 0.5)
+        elif waveform == 'RAMP':
+            sound = amplitude * sg.sawtooth(2 * np.pi * frequency * time + phase, 0.5)
+        elif waveform == 'PULSE':
+            sound = amplitude * sg.unit_impulse(shape=np.size(time), idx='mid')
+
+        recording = sd.playrec(data=sound,
+                               samplerate=fs,
+                               blocking=True)  # If False, return immediately (but continue playrec in the background).
+
+        return time, sound, recording
