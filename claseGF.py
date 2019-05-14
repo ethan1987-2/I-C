@@ -11,10 +11,10 @@ class FunctionGeneratorAFG3021B():
         self.ins = self.rm.open_resource('USB0::0x0699::0x0346::{}::INSTR'.format(serial))
         self.__canal='1' #self.ins.query('SOUR?')
 
-    def prende(): # habilita la salida del canal seleccionado       
+    def prende(self): # habilita la salida del canal seleccionado       
         self.ins.write('OUTP{}'.format(self.__canal)+':STAT 1')
         
-    def apaga(): # corta la salida del canal seleccionado
+    def apaga(self): # corta la salida del canal seleccionado
         self.ins.write('OUTP{}'.format(self.__canal)+':STAT 0')
     
     @property
