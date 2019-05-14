@@ -56,7 +56,7 @@ class AudioCard:
 
         sd.play(data=sound,
                 samplerate=fs,
-                blocking=True,
+                blocking=False,
                 loop=loop)
 
         return time, sound
@@ -86,6 +86,6 @@ class AudioCard:
 
         recording = sd.playrec(data=sound,
                                samplerate=fs,
-                               blocking=True)  # If False, return immediately (but continue playrec in the background).
+                               blocking=False)  # If False, return immediately (but continue playrec in the background).
 
         return time, sound, recording

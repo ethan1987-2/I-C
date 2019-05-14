@@ -15,7 +15,7 @@ device_list = sd.query_devices()          # List the supported devices. Return o
 
 # ---------- Set defaults for the sounddevice module -------------------------------------------------------------------
 
-sd.default.device = 2, 1                  # [input, output] channels by default.
+sd.default.device = 1, 4                  # [input, output] channels by default.
 sd.default.channels = 1, 1                # Number of input/output channels.
 sd.default.dtype = 'float32', 'float32'   # Data type used for input/output samples.
 # sd.default.latency = 'high', 'high'     # Suggested input/output latency in seconds.
