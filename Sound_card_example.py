@@ -7,7 +7,7 @@ from Oscilloscope_and_Function_generator_classes import OscilloscopeTDS1002B, Fu
 
 audio = AudioCard()
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ======================================================================================================================
 # Record an incoming signal.
 # The output is a time array and a array with the recorded signal.
 
@@ -15,6 +15,7 @@ time_1, recorded_signal = audio.record(fs=46000, duration=10)  # Record for 10 s
 plt.plot(time_1, recorded_signal)
 plt.xlabel('Time [s]')
 plt.ylabel('Recorded signal [?]')
+plt.show()
 
 fs = audio.fs
 duration = audio.duration
@@ -24,11 +25,11 @@ duration = audio.duration
 # Playback some common periodic signal, like sinusoidal or square, to use the sound card like a function generator.
 # The output is the time array and a array with the reproduced signal.
 
-time_2, sound = audio.playback(fs=46000, duration=10, frequency=1, phase=0, waveform='SIN', loop=False)
+time_2, sound = audio.playback(fs=46000, duration=10, amplitude=1, frequency=1, phase=0, waveform='SIN', loop=False)
 plt.plot(time_2, sound)
 plt.xlabel('Time [s]')
 plt.ylabel('Playback signal [?]')
-
+plt.show()
 
 # ======================================================================================================================
 
@@ -38,7 +39,7 @@ osc = OscilloscopeTDS1002B(serial='C108012')  # Change the serial number
 audio = AudioCard()
 
 # Generates a continuous square signal:
-time, sound = audio.playback(fs=46000, duration=10, frequency=1, phase=0, waveform='SQR', loop=True)
+time, sound = audio.playback(fs=46000, duration=10, amplitude=1, frequency=1, phase=0, waveform='SQR', loop=True)
 # Acquire with the oscilloscope:
 osc.medir
 osc.xun = 's'
@@ -54,3 +55,17 @@ osc.apagar
 plt.plot(X, Y)
 plt.xlabel('Time [{}]'.format(osc.xun))
 plt.ylabel('Signal [{}]'.format(osc.yun))
+plt.show()
+
+# ======================================================================================================================
+
+# Playback some common periodic signal and record an incoming signal at the same time
+
+time_3, sound_3, recording_3 = audio.playback_record(fs=46000, duration=10, amplitude=1, frequency=1000,
+                                                     phase=0, waveform='SIN', loop=True)
+plt.plot(time_3, sound_3, time_3, recording_3)
+plt.xlabel('Time [s]')
+plt.ylabel('Signal [?]')
+plt.legend(('Playback', 'Recording'), loc='upper right')
+# plt.title('Title')
+plt.show()
