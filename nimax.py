@@ -19,7 +19,7 @@ with ni.Task() as task:
     print(task.read()) #Mide voltaje, entre 1 y 1024 valores consecutivos.
 
 task = ni.Task()
-task.timing.samp_clk_rate
+task.timing.samp_clk_rate 
 
 task.ai_channels.add_ai_voltage_chan("Dev19/ai0", terminal_config=ni.constants.TerminalConfiguration.DIFFERENTIAL)
 
