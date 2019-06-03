@@ -23,7 +23,7 @@ class NISensorDAQ():
     def set_freq(self, f):
         self.task.timing.samp_clk_timing = f
     
-    def get_device(self):
+    def get_device(self): #daq component devices
         print(self.task.device)
     
     def set_chan(self, device, chan, config): #Asigns device, channel and acquisition config (DIFF, NRSE, RSE) to task
@@ -37,8 +37,8 @@ class NISensorDAQ():
     
     def measure(self, points=1024, plot=False): #Measures a set amount of consecutive voltage points
         data = self.task.read(points)
-        if plot:
-            pp.plot(np.linspace(0, points/self.task.timing.samp_clk_timing, points), data)
+        if data is not None:
+            pp.plot(np.linspace(0, points/self.task.timing.samp_clk_timing, points), data) #acá se podría usar size(data)
         return data
     
     def reset_task(self): #Re-creates the task

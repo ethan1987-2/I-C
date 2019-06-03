@@ -89,12 +89,12 @@ class OsciloscopeTDS1002B():
     def medir_frec(self): #un método
         self.ins.write('MEASU:IMM:TYP FREQ')
         time.sleep(1)
-        return self.ins.query('MEASU:IMM:VAL?')
+        return self.ins.query('MEASU:IMM:VAL?').rstrip(self.ins.query('MEASU:IMM:VAL?')[-2:])
     
     def medir_amp(self,medida): #{ FREQuency | MEAN | PK2pk | CRMs | MINImum | MAXImum |   esto no es amp: RISe | FALL |PWIdth | NWIdth }
         self.ins.write('MEASU:IMM:TYP {}'.format(medida))
         time.sleep(1)
-        return self.ins.query('MEASU:IMM:VAL?')
+        return self.ins.query('MEASU:IMM:VAL?').rstrip(self.ins.query('MEASU:IMM:VAL?')[-2:])
      
         
 ############################################################

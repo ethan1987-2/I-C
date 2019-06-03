@@ -31,7 +31,7 @@ DATA2 = np.zeros([N, q])
 #    task.timing.samp_clk_timing = 48000
 #    pp.plot(np.linspace(0, q/fs, q), task.read(q))
 
-with ni.Task('Tarea') as task:
+with ni.Task() as task:
     task.ai_channels.add_ai_voltage_chan("Dev20/ai0", terminal_config = ni.constants.TerminalConfiguration.DIFFERENTIAL)
     task.timing.cfg.samp_clk_timing(fs)
     for i in frecs:
@@ -46,7 +46,7 @@ for j in range(5):
 
 pp.plot(fftpack.fft(DATA2[0]))
 
-with ni.Task('Tarea2') as task2:
+with ni.Task() as task2:
     task2.ai_channels.add_ai_voltage_chan("Dev20/ai0", terminal_config = ni.constants.TerminalConfiguration.DIFFERENTIAL)
     task2.timing.samp_clk_timing = fs
     print(task2.timing.samp_clk_timing)

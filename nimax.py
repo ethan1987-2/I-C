@@ -16,60 +16,12 @@ for device in system.devices:
 #Crea una tarea, le añade un canal para medir voltaje, especifica modo (RSE, NRSE, DIFF, etc) 
 with ni.Task() as task:
     task.timing.samp_clk_rate #Consultar o cambiar la frecuencia de muestreo de la tarea
-    task.ai_channels.add_ai_voltage_chan("Dev19/ai0", terminal_config=ni.constants.TerminalConfiguration.RSE)
+    task.ai_channels.add_ai_voltage_chan("Dev19/ai0", terminal_config=ni.constants.TerminalConfiguration.DIFFERENTIAL)
     print(task.read()) #Mide voltaje, entre 1 y 1024 valores consecutivos.
 
-task = ni.Task()
-task.timing.samp_clk_rate
 
-task.ai_channels.add_ai_voltage_chan("Dev19/ai0", terminal_config=ni.constants.TerminalConfiguration.DIFFERENTIAL)
-
-a = task.read(1024)
 
 t = np.linspace(0,1024/46000,1024)
-
-a = task.read(1024)
-
-ni.constants.AcquisitionType.CONTINUOUS #Finita
-
-ni.constants.AcquisitionType.FINITE #Continua
-
-ni.constants.TerminalConfiguration.DIFFERENTIAL
-
-ni.constants.TerminalConfiguration.NRSE
-
-ni.constants.TerminalConfiguration.RSE
-=======
-# -*- coding: utf-8 -*-
-
-import nidaqmx as ni
-import numpy as np
-import time
-from matplotlib import pyplot as pp
-from scipy import fftpack
-
-system = ni.system.System.local() #Crea instancia del sistema de adquisicion
-system.driver_version #Info sobre la version
-
-for device in system.devices:
-    print(device) #Lista de dispositivos disponibles
-    
-#Crea una tarea, le añade un canal para medir voltaje, especifica modo (RSE, NRSE, DIFF, etc) 
-with ni.Task() as task:
-    task.timing.samp_clk_rate #Consultar o cambiar la frecuencia de muestreo de la tarea
-    task.ai_channels.add_ai_voltage_chan("Dev19/ai0", terminal_config=ni.constants.TerminalConfiguration.RSE)
-    print(task.read()) #Mide voltaje, entre 1 y 1024 valores consecutivos.
-
-task = ni.Task()
-task.timing.samp_clk_rate 
-
-task.ai_channels.add_ai_voltage_chan("Dev19/ai0", terminal_config=ni.constants.TerminalConfiguration.DIFFERENTIAL)
-
-a = task.read(1024)
-
-t = np.linspace(0,1024/46000,1024)
-
-a = task.read(1024)
 
 #investigacion TOMAS:
 nidaqmx._task_modules.in_stream.InStream(task) #Exposes an input data stream on a DAQmx task. TOM
@@ -88,13 +40,4 @@ nidaqmx.task.ai_channel_collection
 
 
 
-ni.constants.AcquisitionType.CONTINUOUS #Continua 10123
-
-ni.constants.AcquisitionType.FINITE #Finita 10178
-
-ni.constants.TerminalConfiguration.DIFFERENTIAL # 10106
-
-ni.constants.TerminalConfiguration.NRSE
-
-ni.constants.TerminalConfiguration.RSE
 
