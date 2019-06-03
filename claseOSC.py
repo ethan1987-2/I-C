@@ -91,11 +91,11 @@ class OsciloscopeTDS1002B():
         time.sleep(1)
         return self.ins.query('MEASU:IMM:VAL?')
     
-    def medir_vpp(self): #un método
-        self.ins.write('MEASU:IMM:TYP PK2PK')
+    def medir_amp(self,medida): #{ FREQuency | MEAN | PK2pk | CRMs | MINImum | MAXImum |   esto no es amp: RISe | FALL |PWIdth | NWIdth }
+        self.ins.write('MEASU:IMM:TYP {}'.format(medida))
         time.sleep(1)
         return self.ins.query('MEASU:IMM:VAL?')
-        
+     
         
 ############################################################
 

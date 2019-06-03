@@ -28,7 +28,8 @@ class AudioCard:
         recording = sd.rec(frames=int(self.duration * self.fs),
                            samplerate=fs,
                            channels=1,
-                           blocking=True)
+                           blocking=False,
+                           dtype='float32')
         return time, recording
 
     def playback(self, fs, duration, amplitude, frequency, phase, waveform, loop):

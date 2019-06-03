@@ -37,10 +37,10 @@ class FunctionGeneratorAFG3021B():
         print('amplitud configurada en el instrumento')
         return self.ins.query('SOUR{}'.format(self.__canal)+':VOLT:LEV:IMM:AMPL?')
        
-    def set_freq(self, freq, frecun): #freq es un nro frecun=Hz, MHz, kHz
+    def set_frec(self, freq, frecun): #freq es un nro frecun=Hz, MHz, kHz
         self.ins.write('SOUR{}'.format(self.__canal)+':FREQ:FIX {}'.format(freq) + frecun)
     
-    def get_freq(self):
+    def get_frec(self):
         print('frecuencia configurada en el instrumento')
         return self.ins.query('SOUR{}'.format(self.__canal)+':FREQ:FIX?') 
    
@@ -51,12 +51,19 @@ class FunctionGeneratorAFG3021B():
         print('clavo configurado en el instrumento')
         return self.ins.query('SOUR{}'.format(self.__canal)+':VOLT:OFFS?') 
 
-    def fase(self):
+    def get_fase(self):
         print('fase configurado en el instrumento')
         return self.ins.query('SOUR{}'.format(self.__canal)+':PHAS:ADJ?')
     
-    def fase(self,phi,phiUn):#phiUN= RAD va entre -1 y 1 , DEG va entre -180 y 180
+    def set_fase(self,phi,phiUn):#phiUN= RAD va entre -1 y 1 , DEG va entre -180 y 180
         if phiUn=='RAD':
             print('fase en RADs: el valor debe ser entre 1 y -1 y no PI y -PI, se autocorregirá y enviará')
             phi='{} PI'.format(phi) #PROBAR ESTO
         self.ins.write('SOUR{}'.format(self.__canal)+':PHAS:ADJ {}'.format(phi+' '+phiUn))
+        
+    def set_forma(self,forma):#string = {SINusoid|SQUare|PULSe|RAMP|PRNoise|DC|SINC|GAUSsian|LORentz|ERISe|EDECay|HAVersine|USER[1]|USER2|USER3|USER4|EMEMory|EFILe}
+        self.ins.write('SOUR{}'.format(self.__canal)+':FUNC:SHAP {}'.format(forma))
+        
+    def get_forma(self):
+        print('forma configurado en el instrumento')
+        return self.ins.query('SOUR{}'.format(self.__canal)+':FUNC:SHAP?')
