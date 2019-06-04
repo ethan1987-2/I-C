@@ -21,7 +21,7 @@ import sounddevice as sd
 
 audio=AudioCard()
 osc=OsciloscopeTDS1002B('C065087')
-funcg=FunctionGeneratorAFG3021B('C034166')
+funcg=FunctionGeneratorAFG3021B('C036492')
 
 
 device_list = sd.query_devices()
@@ -153,38 +153,44 @@ funcg.set_offset(4)
 
 
 #BARRIDO EN FRECUENCIA(INPUT)
+device_list = sd.query_devices()
+duration = 4
+fs = 96000
 
-outputv=[]
-outputf=[]
-frecs=np.linspace(10000, 50000, 40)
-b=0
+N = 10
+frecs = np.linspace(100, 100000, N)
+d = 0
+DATAA = np.zeros([N, int(duration*fs)])
+
 for i in frecs:
     funcg.set_frec(i,'Hz')
-    time.sleep(2)
-    DATA=audio.record(fs=46000, duration=10)
-    print(b)
-    b=b+1
-    print(i)
-    
-    
+    time.sleep(1)
+    DATAA[d] = np.transpose(sd.rec(frames=int(duration * fs),samplerate=fs,channels=1,
+        blocking=True,dtype='float32'))
+    d=d+1
+        
 M=np.transpose([ampu,outF,outV])
-np.savetxt('ampu_sampleo96k.txt', M, header='amp, outputf, outputv, sampleo 96kHz')
+np.savetxt('entrada_freqs.txt', np.transpose(DATAA), header='4 seg, sampleo 96kHz, frecs = np.linspace(100, 100000, 10)')
 
-
+DATA = np.transpose
+pp.plot(DATA[1])
 #BARRIDO EN AMPLITUD (INPUT)
 
 outputv=[]
 outputf=[]
-amps=np.linspace(10000, 50000, 40)
+DATAMPS = np.zeros([10, int(duration*fs)])
+amps = np.linspace(0.1, 2, 10)
 b=0
+funcg.set_frec(1000,'Hz')
 for i in amps:
     funcg.set_amp(i)
     time.sleep(2)
-    DATA=audio.record(fs=46000, duration=10)
+    DATAMPS[b] = np.transpose(sd.rec(frames=int(duration * fs),samplerate=fs,channels=1,
+        blocking=True,dtype='float32'))
     print(b)
     b=b+1
     print(i)
     
     
 M=np.transpose([ampu,outF,outV])
-np.savetxt('ampu_sampleo96k.txt', M, header='amp, outputf, outputv, sampleo 96kHz')
+np.savetxt('entrada_amps_2.txt', np.transpose(DATAMPS), header='4 seg, 1 kHz, sampleo 96kHz')

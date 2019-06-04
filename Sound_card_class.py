@@ -27,7 +27,7 @@ class AudioCard:
         time = np.linspace(start=0, stop=duration, num=duration*fs)
         recording = sd.rec(frames=int(self.duration * self.fs),
                            samplerate=fs,
-                           channels=1,
+                           channels=2,
                            blocking=False,
                            dtype='float32')
         return time, recording
