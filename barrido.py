@@ -20,17 +20,17 @@ from Sound_card_class import *
 import sounddevice as sd 
 
 audio=AudioCard()
-osc=OsciloscopeTDS1002B('C065087')
-funcg=FunctionGeneratorAFG3021B('C036492')
+osc=OsciloscopeTDS1002B('C065093')
+funcg=FunctionGeneratorAFG3021B('C034167')
 
 
 device_list = sd.query_devices()
 
-sd.default.device = 1, 3                  # [input, output] device id from sd.query_devices() list
+sd.default.device = 5, 3                  # [input, output] device id from sd.query_devices() list
 sd.default.channels = 1, 1                # Number of input/output channels.
 sd.default.dtype = 'float32', 'float32'   # Data type used for input/output samples.
 # sd.default.latency = 'high', 'high'     # Suggested input/output latency in seconds.
-sd.default.samplerate = 46000         
+sd.default.samplerate = 96000         
 
 osc.medir()
 #osc.apagar()
@@ -41,12 +41,13 @@ osc.yun='Volts'
 osc.get_vscal(1)
 osc.medir_amp('PK2')
 
+#------------------------------------------------------------------------
 #CARACTERIZAR OUTPUT PLACA SONIDO
 
 #audio.stop
 
 
-#BARRIDO EN FRECUENCIAS
+#BARRIDO EN FRECUENCIAS (OUTPUT)
 
 #frecs=np.logspace(1,5.3, num=40)
 #pp.plot(np.log(frecs),'.')
@@ -92,11 +93,7 @@ pp.xlim(0,100000)
 pp.plot(outputF, outputV, '.')
 pp.xlim(0,100000)
 
-
-
-
-
-#Barrido en AMPLITUDES
+#BARRIDO EN AMPLITUDES (OUTPUT)
 
 outputf=[]
 outputv=[]
@@ -151,46 +148,84 @@ funcg.set_amp(2)
 funcg.set_fase(1/3,'RAD') #preguntar esto, si asigne bien valores multiples a la propiedad
 funcg.set_offset(4)
 
-
-#BARRIDO EN FRECUENCIA(INPUT)
+#######
+#BARRIDO EN FRECUENCIA (INPUT)
 device_list = sd.query_devices()
-duration = 4
+duration = 3
 fs = 96000
 
-N = 10
-frecs = np.linspace(100, 100000, N)
-d = 0
-DATAA = np.zeros([N, int(duration*fs)])
+N = 5
+frecs = np.linspace(60000, 100000, N)
 
-for i in frecs:
-    funcg.set_frec(i,'Hz')
+funcg.set_amp(0.5)
+
+DATAFRECS2 = []
+i = 0
+for f in frecs:
+    print(f)
+    funcg.set_frec(f,'Hz')
     time.sleep(1)
-    DATAA[d] = np.transpose(sd.rec(frames=int(duration * fs),samplerate=fs,channels=1,
+    crudo = np.transpose(sd.rec(frames=int(duration * fs),samplerate=fs,channels=2,
         blocking=True,dtype='float32'))
-    d=d+1
-        
-M=np.transpose([ampu,outF,outV])
-np.savetxt('entrada_freqs.txt', np.transpose(DATAA), header='4 seg, sampleo 96kHz, frecs = np.linspace(100, 100000, 10)')
+    DATAFRECS2.append(crudo[0])
+    i=i+1
+    print(i)
+funcg.set_frec(frecs[0], 'Hz')
 
-DATA = np.transpose
-pp.plot(DATA[1])
+
+np.size(crudo[0])    
+
+pp.plot(DATAFRECS[5])
+
+prueba = sd.rec(frames=int(duration * fs),samplerate=fs,channels=2,
+        blocking=False,dtype='float32') 
+prueba[1][0]
+pp.plot(prueba[1])
+
+#M=np.transpose([ampu,outF,outV])
+
+DATAFRECS = np.transpose
+pp.plot(DATAFRECS[5])
+np.savetxt('entrada_frecuencias2.txt', np.transpose(DATAFRECS2), header='3 seg, sampleo 96kHz, frecs = np.linspace(60000, 100000, 5)')
+
+
+#######
 #BARRIDO EN AMPLITUD (INPUT)
 
-outputv=[]
-outputf=[]
-DATAMPS = np.zeros([10, int(duration*fs)])
-amps = np.linspace(0.1, 2, 10)
-b=0
+#outputv=[]
+#outputf=[]
+M = 5
+amps = np.linspace(2, 2.5, M)
+
 funcg.set_frec(1000,'Hz')
-for i in amps:
-    funcg.set_amp(i)
-    time.sleep(2)
-    DATAMPS[b] = np.transpose(sd.rec(frames=int(duration * fs),samplerate=fs,channels=1,
+DATAMPS2 = []
+
+j = 0
+for a in amps:
+    print(a)
+    funcg.set_amp(a)
+    time.sleep(1)
+    CRUDO = np.transpose(sd.rec(frames=int(duration * fs),samplerate=fs,channels=2,
         blocking=True,dtype='float32'))
-    print(b)
-    b=b+1
-    print(i)
+    DATAMPS2.append(CRUDO[0])
+    j=j+1
+    print(j)
+    
+pp.plot(DATAMPS2[4])
     
     
 M=np.transpose([ampu,outF,outV])
-np.savetxt('entrada_amps_2.txt', np.transpose(DATAMPS), header='4 seg, 1 kHz, sampleo 96kHz')
+np.savetxt('entrada_amplitudes2.txt', np.transpose(DATAMPS2), header='3 seg, 1 kHz, sampleo 96kHz, amps = np.linspace(0.1, 2, 10)')
+
+FREQS = np.loadtxt('entrada_freqs.txt')
+FREQS = np.transpose(FREQS)
+pp.plot(time, FREQS[8])
+
+
+AMPS = np.loadtxt('entrada_amps_2.txt')
+AMPS = np.transpose(AMPS)
+
+time = np.linspace(0, 4, 4*96000)
+pp.plot(time, AMPS[0])
+pp.plot(time, AMPS[4])
+
