@@ -53,8 +53,8 @@ class OsciloscopeTDS1002B():
         if not CH in (1,2):
             raise ValueError('El valor debe ser numérico 1 o 2')
         else:
-            self.ins.write('DAT:SOU'+' '+str(CH))
-            self.ins.write('MEASU:IMM:SOU'+' '+str(CH))
+            self.ins.write('DAT:SOU CH'+str(CH))
+            self.ins.write('MEASU:IMM:SOU CH'+str(CH))
        
   
     def set_yun(self, yun): #yun= Volts,VV, U: nro divisiones, A:amps,AA, VA:volamps, dB

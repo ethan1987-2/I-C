@@ -34,8 +34,9 @@ sd.default.samplerate = fs
 funcg.prende()
 funcg.set_frec(100,'HZ') #ALTERNATIVA: segun hilario, si ponemos una onda generada a la fs de la placa de audio, si los canales no son simultaneos debería notarse una diferencia.
 funcg.set_amp(2)
-#funcg.set_fase(1/3,'RAD') #preguntar esto, si asigne bien valores multiples a la propiedad
-#funcg.set_offset(4)
+
+#Con esta señal , deduzco, que se puede luego de la toma sumar los datos de los 2 canales y deberán estar desfasados si no son simultáneos , porque tendrán igual cantidad de puntos pero toman la onda en distintos puntos, luego se tendran 2 iguales pero desfasadas en 1 punto....el desfasaje es chico, por eso conviene que la frec sea alta
+#Pensando mejor, me doy cuenta que si parto del GF con un señal a altisima fs, y tomo 2 canales supuestam NO simult , con apreciablemente distinta fs, entonces simplemente los primeros datos no serán iguales...acá hay que tener en cuenta que |T1-T2|/Tg debe ser menor q 1 o pueden repetirse los valores y no darnos cuenta del desfasaje
 
 tiempo = np.linspace(0,duration,fs*duration)
 sen2ch = sd.rec(frames=int(duration * fs),
@@ -49,9 +50,7 @@ pp.plot(tiempo, sen2ch)
 pp.plot(tiempo, DATA)
 pp.plot(tiempo, 100*DIFF)
 DIFF = DATA[0]-DATA[1]
-#Con esta señal , deduzco, que se puede luego de la toma sumar los datos de los 2 canales y deberán estar desfasados si no son simultáneos , porque tendrán igual cantidad de puntos pero toman la onda en distintos puntos, luego se tendran 2 iguales pero desfasadas en 1 punto....el desfasaje es chico, por eso conviene que la frec sea alta
 
-#Pensando mejor, me doy cuenta que si parto del GF con un señal a altisima fs, y tomo 2 canales supuestam NO simult , con apreciablemente distinta fs, entonces simplemente los primeros datos no serán iguales...acá hay que tener en cuenta que |T1-T2|/Tg debe ser menor q 1 o pueden repetirse los valores y no darnos cuenta del desfasaje
 
 M=np.transpose([frecs,outputF,outputV])
 np.savetxt('simult_seno.txt', sen2ch, header='frec 100Hz, sampleo 96 kS')
