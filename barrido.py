@@ -26,19 +26,23 @@ funcg=FunctionGeneratorAFG3021B('C034167')
 
 device_list = sd.query_devices()
 
+
 sd.default.device = 5, 3                  # [input, output] device id from sd.query_devices() list
-sd.default.channels = 1, 1                # Number of input/output channels.
+sd.default.channels = 1, 2                # Number of input/output channels.
 sd.default.dtype = 'float32', 'float32'   # Data type used for input/output samples.
 # sd.default.latency = 'high', 'high'     # Suggested input/output latency in seconds.
 sd.default.samplerate = 96000         
 
 osc.medir()
+osc.apagar()
 #osc.apagar()
-osc.xun='s'
-osc.yun='Volts'
-
+osc.set_xun('s')
+osc.get_xun()
+osc.set_yun('Volts')
+osc.get_yun()
 
 osc.get_vscal(1)
+
 osc.medir_amp('PK2')
 
 #------------------------------------------------------------------------
@@ -51,32 +55,40 @@ osc.medir_amp('PK2')
 
 #frecs=np.logspace(1,5.3, num=40)
 #pp.plot(np.log(frecs),'.')
-
+osc.set_canal(1)
 outputv=[]
 outputf=[]
-frecs=np.linspace(10000, 50000, 40)
+frecs=np.linspace(10000, 80000, 20)
 b=0
 for i in frecs:
     
-    osc.set_tscal(1/i)
-    audio.playback(fs=46000, duration=10, frequency=i, amplitude=1, phase=0, waveform='SIN', loop=False)
-    time.sleep(5)
+    osc.set_tscal(2/i)
+    audio.playback(fs=96000, duration=10, frequency=i, amplitude=1, phase=0, waveform='SIN', loop=False)
+    time.sleep(1)
     #osc.auto()
-    outputf.append(float(osc.medir_frec()))
-    outputv.append(float(osc.medir_amp('PK2')))
+    outputf.append(osc.medir_frec())
+    outputv.append(osc.medir_amp('PK2'))
 #    outputf.append(osc.medir_frec())
 #    outputv.append(osc.medir_amp('PK2'))
     print(b)
     b=b+1
     print(i)
-
+    
+#audio.playback(fs=96000, duration=10, frequency=1000, amplitude=1, phase=0, waveform='SIN', loop=False)
+#
+#
+#time = np.linspace(start=0, stop=10, num=10*96000)
+# sound = amplitude * np.sin(2 * np.pi * 1000 * time )
+# 
+#sd.play(data=sound,samplerate=96000,blocking=True,loop=False)
+k=0
 for v in outputf: #si falla lo anterior probar esto
-    outputf(v)=float(v)
-    outputv(v)=float(v)
+    outputf(k)=float(v)
+    k=k+1
     
     
-M=np.transpose([frecs,outputF,outputV])
-np.savetxt('frecs_sampleo46k.txt', M, header='frec, outputf, outputv, sampleo 46kHz')
+M=np.transpose([frecs,outputf,outputv])
+np.savetxt('6-5frecs_sampleo96k.txt', M, header='frec, outputf, outputv, sampleo 96kHz')
 
 #outputV=[]
 #outputF=[]
@@ -95,27 +107,27 @@ pp.xlim(0,100000)
 
 #BARRIDO EN AMPLITUDES (OUTPUT)
 
-outputf=[]
-outputv=[]
+outputAMPf=[]
+outputAMPv=[]
 
-amps=np.linspace(2,4,10)
+amps=np.linspace(0.1,3,20)
 
 b=0
 for i in amps:
 #    osc.set_vscal(2*2.7,1)
     osc.set_tscal(1/1000)
     audio.playback(fs=96000, duration=10, frequency=1000, amplitude=i, phase=0, waveform='SIN', loop=False)
-    time.sleep(3)
+    time.sleep(1)
     print(b)
     b=b+1
     print(i)
-    outputf.append(float(osc.medir_frec()))
-    outputv.append(float(osc.medir_amp('PK2')))
-#    outputf3.append(osc.medir_frec())
+    outputAMPf.append(float(osc.medir_frec()))
+    outputAMPv.append(float(osc.medir_amp('PK2')))
+#    outputAMPf3.append(osc.medir_frec())
 #    outputa3.append(osc.medir_amp('PK2'))
 
-M=np.transpose([ampu,outF,outV])
-np.savetxt('ampu_sampleo96k.txt', M, header='amp, outputf, outputv, sampleo 96kHz')
+M2=np.transpose([amps,outputAMPf,outputAMPv])
+np.savetxt('5-6ampu_sampleo96k.txt', M, header='amp, outputAMPf, outputAMPv, sampleo 96kHz')
     
 #outputF3=[]
 #outputV3=[]
