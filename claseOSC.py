@@ -83,18 +83,18 @@ class OsciloscopeTDS1002B():
         PT_OF = float(self.ins.query('WFMP:PT_OF?'))
 
         Xn = XZE + XIN*(np.linspace(1,2500,2500) - PT_OF)
-        return (Xn,Yn)
+        return np.array((Xn,Yn))
     
         
     def medir_frec(self): #un método
         self.ins.write('MEASU:IMM:TYP FREQ')
         time.sleep(1)
-        return self.ins.query('MEASU:IMM:VAL?').rstrip(self.ins.query('MEASU:IMM:VAL?')[-2:])
+        return self.ins.query('MEASU:IMM:VAL?').replace('\n','')
     
     def medir_amp(self,medida): #{ FREQuency | MEAN | PK2pk | CRMs | MINImum | MAXImum |   esto no es amp: RISe | FALL |PWIdth | NWIdth }
         self.ins.write('MEASU:IMM:TYP {}'.format(medida))
         time.sleep(1)
-        return self.ins.query('MEASU:IMM:VAL?').rstrip(self.ins.query('MEASU:IMM:VAL?')[-2:])
+        return self.ins.query('MEASU:IMM:VAL?').replace('\n','')
      
         
 ############################################################
