@@ -22,23 +22,24 @@ funcg=FunctionGeneratorAFG3021B('C036492')
 
 
 fs = 96000
-duration = 100
+duration = 50
 frequency = 100
 amplitude = 1
 phase = 0
-RES_Ohm = 1165
+RES_Ohmvieja = 1165
+RES_Ohm = 963
 
 sd.query_devices()
 #Alimentar al diodo con una señal producida por la placa de audio
-audio.playback(fs, duration, amplitude, frequency, phase, 'RAMP',
+audio.playback(fs, duration, amplitude, frequency, phase, 'SIN',
                loop=False)
 
 osc.set_canal(1)
 osc.set_canal(2)
 osc.get_canal()
-voltsch1_1er = osc.datos() #Medir pantalla del osciloscopio
+voltsch1_3er = osc.datos() #Medir pantalla del osciloscopio
 prueba= osc.datos() 
-voltsch2_1er = osc.datos()
+voltsch2_3er = osc.datos()
 
 #pp.plot(amp * sg.sawtooth(2 * np.pi * freq * np.linspace(0,10,1000)))
 np.max(voltsch1_1er[1])-np.min(voltsch1_1er[1])
@@ -46,9 +47,17 @@ np.max(voltsch1_1er[1])-np.min(voltsch1_1er[1])
 voltsch1_1er_corr = voltsch1_1er[1]-np.mean(voltsch1_1er[1])
 
 pp.plot(voltsch1_1er[0], voltsch1_1er[1])
-pp.plot(prueba[0], prueba[1])
+pp.plot(voltsch2_1er[0], voltsch2_1er[1])
+pp.figure()
+pp.plot(voltsch1_2da[0], voltsch1_2da[1])
+pp.plot(voltsch2_2da[0], voltsch2_2da[1])
 
-pp.plot(voltsch1_1er[0], voltsch1_1er[1])
+pp.plot(voltsch1_3er[0], voltsch1_3er[1])
+pp.plot(voltsch2_3er[0], voltsch2_3er[1])
+
+pp.plot(voltsch1_3er[1]-voltsch2_3er[1],voltsch2_3er[1]/RES_Ohm)
+
+
 pp.plot(voltsch1_1er[1][350:850], voltsch2_1er[1][350:850])
 pp.plot(voltsch1_1er[1], voltsch2_1er[1])
 corriente_1er = voltsch2_1er[1]/RES_Ohm 
@@ -69,7 +78,7 @@ pp.plot(voltsch1_2do[1], voltsch2_2do[1])
 corriente_2do = voltsch2_2do[1]/RES_Ohm 
 pp.plot(voltsch1_2do[1][800:1300], corriente_2do[800:1300])
 
-np.savetxt('diodoch1_2do.txt', np.transpose(voltsch1_2do), header='freq 100 Hz, amp 1, RES 1165, sampleo 96kHz')
+np.savetxt('diodoch2_2da.txt', np.transpose(voltsch2_2da), header='freq 100 Hz, amp 1, RES 963, sampleo 96kHz')
 
 
 
