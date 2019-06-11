@@ -15,6 +15,7 @@ import claseGF
 
 system = ni.system.System.local()
 
+osc=OsciloscopeTDS1002B('')
 fg = FunctionGeneratorAFG3021B('C033250')
 
 q = 1024
