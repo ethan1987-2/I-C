@@ -43,6 +43,60 @@ with ni.Task() as task:
         print(i, b)
         b = b+1        
 
+#intento del dia 14-6
+        
+#POR FIN!!! ASI SE HACE ESTO!! CAMBIAR LA FS:
+tarea1=ni.Task()
+tarea1.ai_channels.add_ai_voltage_chan("Dev11/ai0", terminal_config = ni.constants.TerminalConfiguration.DIFFERENTIAL)
+tarea1.timing.cfg_samp_clk_timing(30000)
+tarea1.start()
+print(tarea1.timing.samp_clk_rate)
+
+#PARAR Y CERRAR TAREAS NO ES LO MISMO!!!!
+tarea1.stop()
+tarea1.name
+tarea1.close()
+
+
+
+with ni.Task() as tarea:
+    tarea.ai_channels.add_ai_voltage_chan("Dev11/ai0", terminal_config = ni.constants.TerminalConfiguration.DIFFERENTIAL)
+    tarea.timing.cfg_samp_clk_timing(48000)
+    tarea.start()
+    print(tarea.timing.samp_clk_rate)
+    vector=tarea.read(1024)
+
+
+q = 999
+fs = 48000
+N = 20
+frecs = np.linspace(1000, 30000, N)
+b = 0
+DATA1 = np.zeros([N, q])
+#DATA1=q*[]
+
+with ni.Task() as tarea:
+    tarea.ai_channels.add_ai_voltage_chan("Dev11/ai0", terminal_config = ni.constants.TerminalConfiguration.DIFFERENTIAL)
+    tarea.timing.cfg_samp_clk_timing(fs)
+    tarea.start()
+    print(tarea.timing.samp_clk_rate)
+    for i in frecs:
+        fg.set_frec(i, 'Hz')
+        time.sleep(2)
+        DATA1[b]=tarea.read(q)
+        print(i, b)
+        b = b+1        
+
+for j in range(5): 
+    pp.figure()
+    pp.plot(np.linspace(0, q/fs, q), DATA2[0], '.')
+
+#hasta acá fue lo del dia 14-6 ...sigue script viejo
+    
+
+
+
+
 for j in range(5): 
     pp.plot(np.linspace(0, q/fs, q), data2[0], '.')
 
