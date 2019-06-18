@@ -131,7 +131,7 @@ while t < T:
             
 with ni.Task() as tarea:
     tarea.ao_channels.add_ao_voltage_chan("Dev22/ao0", min_val=0, max_val=5)
-    tarea.write(3, auto_start=True)
+    tarea.write(5, auto_start=True)
 
 #APAGAR
 with ni.Task() as tarea:
