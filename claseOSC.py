@@ -16,7 +16,7 @@ class OsciloscopeTDS1002B():
         self.rm = visa.ResourceManager()        
         self.serial = serial
         self.ins = self.rm.open_resource('USB0::0x0699::0x0363::{}::INSTR'.format(serial))
-        self.medir= self.ins.write('ACQ:STATE 1')
+        self.ins.write('ACQ:STATE 1')
         self.ins.write('WFMP:BYT_N'+' '+'1')
         self.ins.write('WFMP:BIT_N'+' '+'8')
         self.ins.write('WFMP:BN_F'+' '+'RP')
@@ -26,6 +26,9 @@ class OsciloscopeTDS1002B():
 
     def apagar(self): # detener osciloscopio
         self.ins.write('ACQ:STATE 0')
+    
+    def medir(self):
+        self.ins.write('ACQ:STATE 1')
         
     def auto(self): # ejecutar autoconfiguracion del osciloscopio
         self.ins.write('AUTOS EXEC')
