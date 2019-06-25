@@ -1,0 +1,5 @@
+class_spec: Arduino0:Servo
+fqbn: ''
+port: ''
+sketch_folder: E:\TOMAS_G\I-C\Servo
+usbID: ''
