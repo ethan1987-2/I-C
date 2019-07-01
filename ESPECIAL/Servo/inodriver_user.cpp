@@ -17,7 +17,7 @@
 Servo myservo;  // create servo object to control a servo
 
 void user_setup() {
-  myservo.attach(9);
+  myservo.attach(9);  // attach servo to pin 9
 }
 
 void user_loop() {
@@ -26,7 +26,7 @@ void user_loop() {
 int set_ANGLE(float value) {
   int servo_value = value;
 
-  myservo.write(servo_value);                  // sets the servo position according to the scaled value
+  myservo.writeMicroseconds(servo_value);                  // sets the servo position according to the input value
   //delay(15);                           // waits for the servo to get there
-  return 0;
+  //return 0;
 };
