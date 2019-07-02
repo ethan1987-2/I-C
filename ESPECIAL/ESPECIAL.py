@@ -22,14 +22,26 @@ return_value, image = camera.read()
 
 
 #M = cv2.imread('opencv.png')
+#  caracterizacion de movimiento del servo
+v=np.linspace(400,600,10)
+
+
+if __name__ == '__main__':
+    with Servo.via_packfile('Servo.pack.yaml') as dev:
+        for i in v:
+#        for i in range(400,11):
+            print('inicio',i)
+            dev.angle = i #* ureg.degree      #ANGULO DE COMIENZO
+            time.sleep(20)
+            print('fin',i)
+
+
+for a in range(400,700) :
+    print(a)
   
 if __name__ == '__main__':
     with Servo.via_packfile('Servo.pack.yaml') as dev:
-        dev.angle = 400 #* ureg.degree      #ANGULO DE COMIENZO
-  
-if __name__ == '__main__':
-    with Servo.via_packfile('Servo.pack.yaml') as dev:
-        dev.angle = 700 #* ureg.degree   #ANGULO DE FINAL
+        dev.angle = 400 #* ureg.degree   #ANGULO DE FINAL
 
 angs=np.linspace(500,700,50)  
 p=0
