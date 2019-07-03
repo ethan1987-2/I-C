@@ -25,8 +25,8 @@ void user_loop() {
 // COMMAND: ANGLE, FEAT: angle
 int set_ANGLE(float value) {
   int servo_value = value;
- //   myservo.write(servo_value);
-  myservo.writeMicroseconds(servo_value);                  // sets the servo position according to the input value
-  delay(500);                           // waits for the servo to get there
+  myservo.writeMicroseconds(servo_value);
+  //myservo.write(servo_value);                  // sets the servo position according to the input value
+  delay(1000);                           // waits for the servo to get there
   //return 0;
 };
