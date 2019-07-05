@@ -63,9 +63,9 @@ for f in poss[:,1]:
     params,covar=curve_fit(func,x,y,p0=(0.3,0,200))# cuadrados minimos para sacar el eje principal de la difraccion , p0 parametros iniciales
     dire=[5,func(5,params[0],params[1],params[2])-func(0,params[0],params[1],params[2])] #vector director del eje principal  del patron
     rads=np.arctan(-dire[1]/dire[0]) #angulo de rotación para enderezar el patron respecto al eje de la camara
-    [rows,cols]=fotoPROM.shape
+    [rows,cols]=binary.shape
     M = cv2.getRotationMatrix2D((cols/2,rows/2),rads*180/np.pi,1) #construyo la matriz de rotación
-    dst = cv2.warpAffine(fotoPROM,M,(cols,rows)) #enderezo la imagen
+    dst = cv2.warpAffine(binary,M,(cols,rows)) #enderezo la imagen
     proyY=np.sum(dst,axis=0) #vector de proyeccion de intensidades en eje Y
     if np.sum(proyY)==0: proyY=1 #evito un error de division por 0
     proyX=np.sum(dst,axis=1) #vector de proyeccion de intensidades en eje X
