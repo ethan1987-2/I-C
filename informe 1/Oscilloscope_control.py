@@ -1,10 +1,12 @@
 # ----- Controlling the oscilloscope without using Lantz ---------------------------------------------------------------
 
-import visa                             # Control measurement devices
+#import visa                             # Control measurement devices  #VERSION ANTERIOR DE CUANDO CURSE "Instr y Control"
+import pyvisa                             # Control measurement devices
 import numpy as np                      # Numerical Python
 import matplotlib.pyplot as plt         # Plotting library
 
-rm = visa.ResourceManager('C:\\Windows\\system32\\visa64.dll')
+# rm = visa.ResourceManager('C:\\Windows\\system32\\visa64.dll')     #VERSION ANTERIOR DE CUANDO CURSE "Instr y Control"
+rm = pyvisa.ResourceManager()
 #  If we called this object without argument, PyVISA will use the default backend (NI), which tries to find a VISA
 #  shared library.
 #  print(rm)
@@ -14,7 +16,8 @@ instruments = rm.list_resources()
 #  ‘?*::INSTR’ means that by default only instrument whose resource name ends with ‘::INSTR’ will be listed.
 #  See VISA Resource Syntax: https://pyvisa.readthedocs.io/en/1.8/names.html.
 
-osci = rm.open_resource('USB0::0x0699::0x0363::C102220::INSTR')
+osci = rm.open_resource(instruments[0])
+# osci = rm.open_resource('USB0::0x0699::0x0363::C102220::INSTR')
 #  Ask the ResourceManager to open the instrument and
 #  assign the returned object to the 'osci' (oscilloscope).
 #  Argument --> USB[board]::manufacturer ID::model code::serial number[::USB interface number][::INSTR]
@@ -49,27 +52,45 @@ DatWidth = '1'  # 1 byte (8 bites) data. Number of bytes per data point.
 
 
 osci.write('ACQuire:STATE 1')           # Starts (1) or stops (0) oscilloscope acquisitions. Equivalent to RUN/STOP.
+# osci.write('ACQuire:STATE 0')     
 osci.query('ACQuire:STATE?')            # Returns 0 or 1, depending on whether or not the acquisition system is running.
 
-osci.query('DAT:ENC {}'.format(ENC))       # Sets  the format of the waveform data. (2-87)
+
+#para imprimir la pantalla del osciloscopio------------------------------------
+osci.timeout = 30000
+osci.query('HARDCopy?')            # Returns 0 or 1, depending on whether or not the acquisition system is running.
+osci.query('HARDCopy:PORT?')            # Returns 0 or 1, depending on whether or not the acquisition system is running.
+img=osci.write('HARDCopy STARt') 
+image_data = osci.read_raw()           # Returns 0 or 1, depending on whether or not the acquisition system is running.
+# osci.write('SAVE:IMAGE:FILEFORMAT JPG')   #esto solo funciona para el puerto usb delantero del osciloscopio, y lo guardaria en la unidad A: que le asigna al pendrive conectado
+# osci.write('SAVE:WAVEFORM CH1,"A:\Users\tomyg\Pictures\oscCH1.jpg"')   
+with open("scope_capture.jpg", "wb") as f:
+    f.write(image_data)
+#---------------------------------------------------
+
+
+
+osci.write('DAT:ENC {}'.format(ENC))       # Sets  the format of the waveform data. (2-87)
 osci.query('DAT:ENC?')                     # Queries  the format of the waveform data.
 
-osci.query('DAT:SOU {}'.format(CH))        # Sets which waveform will be transferred from the oscilloscope. (2-89)
+osci.write('DAT:SOU {}'.format(CH))        # Sets which waveform will be transferred from the oscilloscope. (2-89)
 osci.query('DAT:SOU?')
 
-osci.query('DAT:STAR {}'.format(start))    # Sets the starting data point for waveform data transfers.
+osci.write('DAT:STAR {}'.format(start))    # Sets the starting data point for waveform data transfers.
 osci.query('DAT:STAR?')
-osci.query('DAT:STOP {}'.format(stop))     # Sets the last data point in the waveform that will be transferred.
+osci.write('DAT:STOP {}'.format(stop))     # Sets the last data point in the waveform that will be transferred.
 osci.query('DAT:STOP?')
 
-osci.query('DAT:WID {}'.format(DatWidth))  # Sets the number of bytes per waveform data point to be transferred.
+osci.write('DAT:WID {}'.format(DatWidth))  # Sets the number of bytes per waveform data point to be transferred.
 
 osci.query('DAT?')                         # Queries the format and location of the waveform data that is transferred.
 
 
-FORMAT = 'RP'    # RI: Signed Integer, RP: Positive Integer.
+FORMAT = 'RP'    # RI: Signed Integer, RP: Positive Integer. 
 DatBit = '8'     # Bits per byte.
-endian = 'MSB'   # MSB: Big Endian, LSB: Little Endian.
+endian = 'MSB'   # MSB: Big Endian, LSB: Little Endian. # Big-endian systems store the most significant byte (MSB) at the lowest memory address.
+                                                        # Little-endian systems store the least significant byte (LSB) at the lowest memory address.
+
 ENC2 = 'BIN'     # ASC: ASCII, BIN: Binary.
 ptsOpico = 'Y'   # Y: Value per point, ENV: peaks positions.
 Ut = 's'         # X unit: 's' for second or 'Hz' for hertz.
@@ -82,24 +103,24 @@ y0_dl = '0'      # Vertical offset. This value does not affect how the oscillosc
 Uy = 'v'         # Y unit: 'v' for volts.
 y0 = '0'         # Waveform conversion factor.
 
-osci.query('WFMP:BYT_N {}'.format(DatWidth))    # WFMPre:BYT_Nr Set or query the preamble byte width of waveform points.
-osci.query('WFMP:BIT_N {}'.format(DatBit))      # WFMPre:BIT_Nr Set or query the preamble bit width of waveform points.
-osci.query('WFMP:BN_F {}'.format(FORMAT))       # WFMPre:BN_Fmt Set or query the preamble binary encoding type.
-osci.query('WFMP:BYT_O {}'.format(endian))      # WFMPre:BYT_Or Set or query the preamble byte order of waveform points.
-osci.query('WFMP:ENC {}'.format(ENC2))          # WFMPre:ENCdg Set or query the preamble encoding method.
+osci.write('WFMP:BYT_N {}'.format(DatWidth))    # WFMPre:BYT_Nr Set or query the preamble byte width of waveform points.
+osci.write('WFMP:BIT_N {}'.format(DatBit))      # WFMPre:BIT_Nr Set or query the preamble bit width of waveform points.
+osci.write('WFMP:BN_F {}'.format(FORMAT))       # WFMPre:BN_Fmt Set or query the preamble binary encoding type.
+osci.write('WFMP:BYT_O {}'.format(endian))      # WFMPre:BYT_Or Set or query the preamble byte order of waveform points.
+osci.write('WFMP:ENC {}'.format(ENC2))          # WFMPre:ENCdg Set or query the preamble encoding method.
 
-osci.query('WFMP:PT_F {}'.format(ptsOpico))     # WFMPre:PT_Fmt Set or query the format of curve points.
-osci.query('WFMP:XIN {}'.format(Dt))            # WFMPre:XINcr Set or query the horizontal sampling interval.
-osci.query('WFMP:XUN {}'.format(Ut))            # WFMPre:XUNit Set or query the horizontal units.
-osci.query('WFMP:XZE {}'.format(t0))            # WFMPre:XZEro Set or query the time of first point in waveform.
+osci.write('WFMP:PT_F {}'.format(ptsOpico))     # WFMPre:PT_Fmt Set or query the format of curve points.
+osci.write('WFMP:XIN {}'.format(Dt))            # WFMPre:XINcr Set or query the horizontal sampling interval.
+osci.write('WFMP:XUN {}'.format(Ut))            # WFMPre:XUNit Set or query the horizontal units.
+osci.write('WFMP:XZE {}'.format(t0))            # WFMPre:XZEro Set or query the time of first point in waveform.
 XZEro = float(osci.query('WFMP:XZE?'))
 XINcr = float(osci.query('WFMP:XINcr?'))        # Query the horizontal sampling interval.
 
-osci.query('WFMP:YMU {}'.format(Dy_dl))         # WFMPre:YMUlt Set or query the vertical scale factor.
+osci.write('WFMP:YMU {}'.format(Dy_dl))         # WFMPre:YMUlt Set or query the vertical scale factor.
 YMUIty = float(osci.query('WFMP:YMU?'))
-osci.query('WFMP:YOF {}'.format(y0_dl))         # WFMPre:YOFf Set or query the vertical offset.
+osci.write('WFMP:YOF {}'.format(y0_dl))         # WFMPre:YOFf Set or query the vertical offset.
 YOFf = float(osci.query('WFMP:YOF?'))
-osci.query('WFMP:YZE {}'.format(y0))            # WFMPre:YZEro Set or query the waveform conversion factor.
+osci.write('WFMP:YZE {}'.format(y0))            # WFMPre:YZEro Set or query the waveform conversion factor.
 YZEro = float(osci.query('WFMP:YZE?'))
 PT_OFf = float(osci.query('WFMP:PT_OFf'))       # Query the trigger offset.
 
@@ -114,7 +135,7 @@ Yn = YZEro + YMUIty*(yn_dl - YOFf)                              # Formula for ma
 Xn = XZEro + XINcr*(np.linspace(1, 2500, num=2500) - PT_OFf)    # Formula for time conversion.
 
 plt.plot(Xn, Yn, '.')
-plt.plot(np.log(Yn), '.')
-plt.plot(Yn, '.')
+# plt.plot(np.log(Yn), '.')
+# plt.plot(Yn, '.')
 plt.xlabel('Time [s]')
 plt.ylabel('Voltage [V]')
