@@ -16,6 +16,9 @@ pares=osc.paresXY()
 
 pp.plot(pares[:,0],pares[:,1])
 
+osc.autoconf()
+
+osc.set_trigLvL(6)
 
 osc.set_tscalScreen(5E-3)
 

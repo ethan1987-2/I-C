@@ -23,7 +23,7 @@ class OsciloscopeTDS2024B():
         self.rm = visa.ResourceManager()        
         self.serial = serial
         self.ins = self.rm.open_resource('USB0::0x0699::0x036A::{}::INSTR'.format(serial))
-        self.ins.timeout=20000;
+        self.ins.timeout=30000;
         self.ins.write('ACQ:STATE 1')
         self.ins.write('WFMP:BYT_N'+' '+'1')
         self.ins.write('WFMP:BIT_N'+' '+'8')
@@ -32,6 +32,7 @@ class OsciloscopeTDS2024B():
                                                                                     # Little-endian systems store the least significant byte (LSB) at the lowest memory address.
         self.ins.write('WFMP:ENC'+' '+'BIN')
         
+    
 
     def run(self): # detener osciloscopio
         self.ins.write('ACQ:STATE 0')
@@ -100,7 +101,7 @@ class OsciloscopeTDS2024B():
         return self.ins.query('WFMP:YMU?')
 
     def set_yoff(self, yof):  # offset de canales o divisiones
-        if not isinstance(yof, str) or isinstance(yof, int):    
+        if not isinstance(yof, str) or not isinstance(yof, int):    
             raise TypeError('el valor debe ser numérico entero')
         self.ins.write('WFMP:YOF'+' '+yof)
 
@@ -127,7 +128,7 @@ class OsciloscopeTDS2024B():
         return self.ins.query('WFMP:XIN?')
 
     def set_xoff(self, xof):  # offset de canales o divisiones
-        if not isinstance(xof, str) or isinstance(xof, int):    
+        if not isinstance(xof, str) or not isinstance(xof, int):    
             raise TypeError('el valor debe ser numérico entero')
         self.ins.write('WFMP:PT_OF'+' '+xof)
 
@@ -143,7 +144,34 @@ class OsciloscopeTDS2024B():
     def get_xzero(self): 
         print('zero de eje x configurado en instrumento para devolver valores medidos:')
         return self.ins.query('WFMP:XZE?')
+
+    def set_trigsource(self, trigsource):  # fuente de trigger. opciones  (str):  CH<x> | EXT | EXT5 | EXT10 | LINE
+        if not isinstance(trigsource,str):
+            raise TypeError('el valor debe ser texto. Uno entre opciones : CH<x> | EXT | EXT5 | EXT10 | LINE')
+        self.ins.write('TRIGger:MAIn:EDGE:SOUrce'+' '+trigsource)
+
+    def get_trigsource(self): 
+        print('fuente de trigger configurado en instrumento para disparar la adquisición:')
+        return self.ins.query('TRIGger:MAIn:EDGE:SOUrce?')
     
+    def set_trigSlope(self, trigslope):  # flanco de trigger. opciones  (str):   FALL | RISe 
+        if not isinstance(trigslope,str):
+            raise TypeError('el valor debe ser texto. Uno entre opciones : FALL | RISe ')
+        self.ins.write('TRIGger:MAIn:EDGE:SLOpe'+' '+trigslope)
+
+    def get_trigSlope(self): 
+        print('flanco de trigger configurado en instrumento para disparar la adquisición (subida o bajada):')
+        return self.ins.query('TRIGger:MAIn:EDGE:SLOpe?')
+    
+    def set_trigLvL(self, triglvl):  # Nivel de trigger en voltios
+        if not (isinstance(triglvl,float) or isinstance(triglvl,int)):
+            raise TypeError('el valor debe ser nuemrico. Voltios')
+        self.ins.write('TRIGger:MAIn:LEVel'+' '+str(triglvl))
+
+    def get_trigLvL(self): 
+        print('Nivel de trigger configurado en instrumento para disparar la adquisición (Voltios):')
+        return self.ins.query('TRIGger:MAIn:LEVel?')
+   
     def paresXY(self):
         print(f'pares XY del canal {self.ins.query('DAT:SOU?')[:-2]} . cambiar con el comando set_canal' )
         YMU = float(self.ins.query('WFMP:YMU?')) 
@@ -168,18 +196,21 @@ class OsciloscopeTDS2024B():
         self.ins.write("HARDC:FORM"+" "+imgfmt)
         self.ins.query('HARDCopy?')            
         self.ins.write('HARDCopy:PORT USB')            
-        self.ins.write('HARDCopy STARt') 
+        ◘self.ins.write('HARDCopy STARt')
+        self.ins.write('*WAI')
         image_data = self.ins.read_raw()           
 
         with open("scope_capture-"+timestamp+".jpg", "wb") as f:
             f.write(image_data)
     
     def medir_frec(self): #un método
+        self.ins.write('*WAI')
         self.ins.write('MEASU:IMM:TYP FREQ')
         time.sleep(1)
         return self.ins.query('MEASU:IMM:VAL?').replace('\n','')
     
     def medir_amp(self,medida): #{ FREQuency | MEAN | PK2pk | CRMs | MINImum | MAXImum |   esto no es amp: RISe | FALL |PWIdth | NWIdth }
+        self.ins.write('*WAI')
         self.ins.write('MEASU:IMM:TYP {}'.format(medida))
         time.sleep(1)
         return self.ins.query('MEASU:IMM:VAL?').replace('\n','')
