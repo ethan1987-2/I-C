@@ -27,7 +27,7 @@ osc.set_tscalScreen(5E-3)
 osc.set_vscalScreen(1,1)
 
 #superponer varias adquisiciones para tener mejor idea del ruido
-for i in range(0,6):
+for i in range(0,8):
     pares=osc.paresXY()
     time.sleep(1)
     pp.plot(pares[:,0],pares[:,1],'b')

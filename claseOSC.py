@@ -31,8 +31,16 @@ class OsciloscopeTDS2024B():
         self.ins.write('WFMP:BYT_O'+' '+'MSB') #así como está da little endian  # MSB al final de transm: Big Endian, LSB al final de transm: Little Endian. # Big-endian systems store the most significant byte (MSB) at the lowest memory address.
                                                                                     # Little-endian systems store the least significant byte (LSB) at the lowest memory address.
         self.ins.write('WFMP:ENC'+' '+'BIN')
+
+    def cerrar_conexion(self):
+        self.ins.close()
         
-    
+    def get_timeout(self):
+        return self.ins.timeout
+
+    def set_timeout(self,timeo):
+	self.ins.timeout=timeo;
+    	return self.ins.timeout
 
     def run(self): # detener osciloscopio
         self.ins.write('ACQ:STATE 0')
@@ -173,7 +181,7 @@ class OsciloscopeTDS2024B():
         return self.ins.query('TRIGger:MAIn:LEVel?')
    
     def paresXY(self):
-        print(f'pares XY del canal {self.ins.query('DAT:SOU?')[:-2]} . cambiar con el comando set_canal' )
+        print(f"pares XY del canal {self.ins.query('DAT:SOU?')[:-2]} . cambiar con el comando set_canal")
         YMU = float(self.ins.query('WFMP:YMU?')) 
         YOF = float(self.ins.query('WFMP:YOF?'))
         YZE = float(self.ins.query('WFMP:YZE?'))
@@ -196,8 +204,8 @@ class OsciloscopeTDS2024B():
         self.ins.write("HARDC:FORM"+" "+imgfmt)
         self.ins.query('HARDCopy?')            
         self.ins.write('HARDCopy:PORT USB')            
-        ◘self.ins.write('HARDCopy STARt')
-        self.ins.write('*WAI')
+       	self.ins.write('HARDCopy STARt')
+        #self.ins.write('*WAI')
         image_data = self.ins.read_raw()           
 
         with open("scope_capture-"+timestamp+".jpg", "wb") as f:
@@ -217,6 +225,5 @@ class OsciloscopeTDS2024B():
      
         
 ############################################################
-
 
 
